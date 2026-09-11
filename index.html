@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GirlFed - Artisanal Girl Dinner Delivery</title>
+<style>
+:root{--bg:#17121a;--ink:#ead9f0;--dim:#8d7496;--accent:#f0a6d8;--line:#2e2333;--card:#1f1826}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:26px 14px}
+h1{font-size:28px;letter-spacing:7px;color:var(--accent);text-transform:uppercase}
+.sub{color:var(--dim);letter-spacing:2.5px;font-size:10.5px;text-transform:uppercase;margin-top:6px}
+#plate{margin:18px 0;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#f5eef7,#cfc0d6);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;font-size:30px;gap:4px;padding:30px;border:4px solid #fff}
+#hud{font-size:12px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;text-align:center;line-height:2}
+#hud b{color:var(--accent)}
+#order{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);padding:16px 18px;width:min(560px,94vw);min-height:70px;font-size:13.5px;line-height:1.65}
+#pantry{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:min(560px,94vw);margin-top:12px}
+button{cursor:pointer;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:13px;transition:border-color .15s}
+button:hover{border-color:var(--accent)}
+#serve{margin-top:12px;padding:13px 26px;font-size:14px;border-color:var(--accent)}
+#log{width:min(560px,94vw);margin-top:14px;font-size:11.5px;color:var(--dim);line-height:1.75;text-align:center}
+</style>
+</head>
+<body>
+<h1>GirlFed</h1>
+<div class="sub">artisanal girl dinner, delivered &middot; no cooking, only vibes</div>
+<div id="plate"></div>
+<div id="hud"></div>
+<div id="order"></div>
+<div id="pantry"></div>
+<button id="serve">SERVE THE PLATE</button>
+<div id="log"></div>
+<script>
+const $=id=>document.getElementById(id);
+const ITEMS=[['🧀','cheese cube'],['🥒','pickle'],['🍇','grapes'],['🥕','lone carrot'],['🫒','olives'],['🍫','chocolate'],['🥖','baguette end'],['🍅','cherry tomato'],['🧈','butter (a vibe)'],['🫐','blueberries']];
+const ORDERS=[
+ 'Wants "something that feels like a picnic I didn\'t have to attend."',
+ 'Requests "a plate with narrative tension."',
+ 'Asks for "crunchy, briny, and emotionally available."',
+ 'Wants "the cheese board of a woman with secrets."',
+ 'Asks for "girl dinner, but make it awards season."',
+ 'Requests "something my group chat would respect."'];
+const S={shift:1,served:0,tips:0,plate:[],over:false};
+let order='';
+function hud(){$('hud').innerHTML='SHIFT <b>'+S.shift+'</b> &middot; PLATES SERVED <b>'+S.served+'</b> &middot; TIPS <b>$'+S.tips+'</b>';}
+function newOrder(){order=ORDERS[Math.floor(Math.random()*ORDERS.length)];
+ $('order').innerHTML='<b>Ticket #'+String(100+S.served)+'</b> - '+order;
+ S.plate=[];drawPlate();}
+function drawPlate(){$('plate').innerHTML=S.plate.map(i=>i[0]).join('');}
+function log(t,c){const d=document.createElement('div');d.textContent=t;if(c)d.style.color=c;$('log').prepend(d);}
+function pantry(){
+ $('pantry').innerHTML='';
+ ITEMS.forEach(it=>{const b=document.createElement('button');b.textContent=it[0]+' '+it[1];
+  b.onclick=()=>{if(S.plate.length<8){S.plate.push(it);drawPlate();}};$('pantry').appendChild(b);});}
+$('serve').onclick=()=>{
+ if(S.over)return;
+ if(S.plate.length<3){log('The plate judges you. Minimum 3 items. Girl dinner has standards.','#f87171');return;}
+ const n=S.plate.length;
+ const hasCheese=S.plate.some(i=>i[1].includes('cheese'));
+ const hasPickle=S.plate.some(i=>i[1].includes('pickle'));
+ const hasChoc=S.plate.some(i=>i[1].includes('chocolate'));
+ let tip=n*2+(hasCheese?4:0)+(hasPickle?3:0)+(hasChoc?2:0);
+ if(hasCheese&&hasPickle&&hasChoc)tip+=6;
+ S.tips+=tip;S.served++;
+ const verdict=n>=6?'A maximalist plate. She gasps. $'+tip+' tip.':hasCheese&&hasPickle?'Brine and dairy harmony. $'+tip+' tip.':'Accepted with a slow nod. $'+tip+' tip.';
+ log('Served: '+S.plate.map(i=>i[0]).join(' ')+' - '+verdict,'var(--accent)');
+ hud();
+ if(S.served>=6){end();}else newOrder();};
+function end(){S.over=true;
+ const avg=Math.round(S.tips/6);
+ $('order').innerHTML='<b>SHIFT COMPLETE</b> - Six plates out the door. $'+S.tips+' in tips. '+(avg>=10?'The group chat has heard of you.':'Solid shift. The fridge light is your spotlight.');
+ const b=document.createElement('button');b.textContent='WORK ANOTHER SHIFT';
+ b.onclick=()=>{Object.assign(S,{shift:S.shift+1,served:0,tips:0,plate:[],over:false});$('log').innerHTML='';newOrder();hud();b.remove();};
+ $('pantry').innerHTML='';$('pantry').appendChild(b);}
+pantry();newOrder();hud();
+</script>
+</body>
+</html>
